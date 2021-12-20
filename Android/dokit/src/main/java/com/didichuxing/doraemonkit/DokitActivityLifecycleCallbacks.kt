@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.os.Bundle
+import android.view.View
 import android.widget.Toast
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
@@ -66,7 +67,7 @@ class DokitActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
                 return
             }
             if (startedActivityCounts == 0) {
-                DokitViewManager.instance.notifyForeground()
+                DokitViewManager.INSTANCE.notifyForeground()
             }
             startedActivityCounts++
         } catch (e: Exception) {
@@ -106,7 +107,7 @@ class DokitActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
             for (listener in LifecycleListenerUtil.LIFECYCLE_LISTENERS) {
                 listener.onActivityPaused(activity)
             }
-            DokitViewManager.instance.onActivityPaused(activity)
+            DokitViewManager.INSTANCE.onActivityPaused(activity)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -121,11 +122,11 @@ class DokitActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
             startedActivityCounts--
             //通知app退出到后台
             if (startedActivityCounts == 0) {
-                DokitViewManager.instance.notifyBackground()
+                DokitViewManager.INSTANCE.notifyBackground()
                 //app 切换到后台 上传埋点数据
                 DataPickManager.getInstance().postData()
             }
-            DokitViewManager.instance.onActivityStopped(activity)
+            DokitViewManager.INSTANCE.onActivityStopped(activity)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -153,7 +154,7 @@ class DokitActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
                     sFragmentLifecycleCallbacks
                 )
             }
-            DokitViewManager.instance.onActivityDestroyed(activity)
+            DokitViewManager.INSTANCE.onActivityDestroyed(activity)
 
             //暂时无法很好的解决屏幕旋转的问题
             //DoKitOrientationEventListener orientationEventListener = mOrientationEventListeners.get(activity.getClass().getSimpleName());
@@ -173,17 +174,21 @@ class DokitActivityLifecycleCallbacks : Application.ActivityLifecycleCallbacks {
      * @param activity
      */
     private fun dispatchOnActivityResumed(activity: Activity) {
+        activity.window.decorView.also {
+            it.post { DoKitEnv.windowSize.set(it.width, it.height) }
+        }
         if (DoKitManager.IS_NORMAL_FLOAT_MODE) {
             //显示内置dokitView icon
-            DokitViewManager.instance.dispatchOnActivityResumed(activity)
+            DokitViewManager.INSTANCE.dispatchOnActivityResumed(activity)
+            return
+        }
+        // FIXME: consider handle permission down to activity-layer, just dispatch resumed-event here
+        //悬浮窗权限 vivo 华为可以不需要动态权限 小米需要
+        if (DoKitPermissionUtil.canDrawOverlays(activity)) {
+            DokitViewManager.INSTANCE.dispatchOnActivityResumed(activity)
         } else {
-            //悬浮窗权限 vivo 华为可以不需要动态权限 小米需要
-            if (DoKitPermissionUtil.canDrawOverlays(activity)) {
-                DokitViewManager.instance.dispatchOnActivityResumed(activity)
-            } else {
-                //请求悬浮窗权限
-                requestPermission(activity)
-            }
+            //请求悬浮窗权限
+            requestPermission(activity)
         }
     }
 

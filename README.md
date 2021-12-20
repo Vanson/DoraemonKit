@@ -13,14 +13,13 @@
   - [六、支持自定义的业务工具集成到面板中](#六支持自定义的业务工具集成到面板中)
   - [七、微信小程序专项工具](#七微信小程序专项工具)
 - [相关文档](#相关文档)
-- [微信交流群(已满员，近期不会开设二群，看后期人数)](#微信交流群已满员近期不会开设二群看后期人数)
+- [微信交流群(一群满员，已开二群)](#一群满员，已开二群)
 - [QQ 交流群](#qq-交流群)
 - [微信公众号](#微信公众号)
 - [项目成员](#项目成员)
-- [协议](#协议)
 - [使用提醒](#使用提醒)
-- [外部合作](#外部合作)
 - [友情链接](#友情链接)
+- [协议](#协议)
 
 ## 简介
 <div align="center">    
@@ -50,8 +49,11 @@ DoKit诞生于滴滴城运服体验技术部，是一款面向泛前端产品研
   <img src="https://pt-starimg.didistatic.com/static/starimg/img/WRUdiWDsw71626696344680.jpg" width = "900" alt="DoKit 首页效果演示" align=center />
 </div>
 
+
 ## 使用手册
 访问[DoKit官网](https://www.dokit.cn/)，点击"[使用中心](http://xingyun.xiaojukeji.com/docs/dokit/#/intro)"。
+
+**新用户重点关注：受集团影响当前DoKit平台端不支持新用户注册，老用户不受影响，新用户开放注册时间以官方消息为准！！！另外只有平台端的相关功能需要申请productId，假如不需要相关功能可以不填或者填空。**
 
 **温馨提示：当前DoKit的所有功能都只针对Debug环境，Release环境未经过实际验证，所以请大家严格按照官方文档来集成，也不建议大家在Release环境上使用DoKit的任何功能。如果大家一定要在Release环境上使用，请自行进行充分的测试和验证，DoKit官方将不承担任何责任和损失。** 
 ## 更新日志
@@ -62,9 +64,6 @@ DoKit诞生于滴滴城运服体验技术部，是一款面向泛前端产品研
 - [DoKit For Flutter-ReleaseNotes](Flutter/README.md)
 
 ## 社区活动
-
-**DoKit官方社区分享季**
-你想让你的才华被更多的人关注到吗？快来参加[DoKit官方社区分享季](https://github.com/didi/DoraemonKit/issues/658)活动吧
 
 **DoKit调研问卷**
 亲爱的DoKit用户,动动你的小手指参与一下我们的官方调研活动吧。我们极度渴望听到你们的声音:
@@ -172,13 +171,9 @@ tips ： 如果使用我们滴滴优秀的开源跨端方案 [chameleon](https:/
 
 
 
-## 微信交流群(已满员，近期不会开设二群，看后期人数)
+## 微信交流群(一群满员，已开二群)
+搜索**justdokit**加我微信好友，注意请添加备注：昵称-DoKit社区用户，否则你的申请将不会被验证通过。
 
-扫描以下二维码或者搜索**jintsky**加我微信好友，注意请添加备注：昵称-DoKit社区用户，否则你的申请将不会被验证通过。
-
-<div align="center">    
- <img src="https://pt-starimg.didistatic.com/static/starimg/img/f4gsSRtscV1601274280794.jpg" width = "160"  alt="微信交流群" align=left />
-</div>
 
 <br/>
 <br/>
@@ -212,10 +207,6 @@ tips ： 如果使用我们滴滴优秀的开源跨端方案 [chameleon](https:/
 <br/>
 <br/>
 
-## 微信公众号
-<div align="center">    
- <img src="https://javer.oss-cn-shanghai.aliyuncs.com/2020/dokit/dokitwx.jpg" width = "200" height = "200" alt="微信公众号" align=left />
-</div>
 
 <br/>
 <br/>
@@ -244,6 +235,8 @@ tips ： 如果使用我们滴滴优秀的开源跨端方案 [chameleon](https:/
 [jellybean](https://github.com/excitedhaha)
 
 **贡献者榜单**
+[wangzhipeng](https://github.com/WangLao100)、
+[momoxiangbei](https://github.com/momoxiangbei)、
 [changzuozhen](https://github.com/changzuozhen)、
 [wanglikun7342](https://github.com/wanglikun7342) 、
 [wenquanlebao](https://github.com/wenquanlebao) 、 
@@ -278,12 +271,6 @@ tips ： 如果使用我们滴滴优秀的开源跨端方案 [chameleon](https:/
 如何成为外部贡献者？ 提交有意义的PR，并被采纳。
 
 
-## 协议
-
-<img alt="Apache-2.0 license" src="https://www.apache.org/img/ASF20thAnniversary.jpg" width="128">
-
-DoKit 基于 Apache-2.0 协议进行分发和使用，更多信息参见 [协议文件](LICENSE)。
-
 ## 使用提醒
 因为SDK目前会配合[dokit.cn](http://www.dokit.cn/)平台, 会产生一些网络数据，这些信息我们收集绝不用于任何恶意用途。
 
@@ -316,13 +303,7 @@ DoKit 基于 Apache-2.0 协议进行分发和使用，更多信息参见 [协议
 
 敬请各位用户知晓。
 
-## 外部合作
 
-**2020中国开源年会DoKit社区合作伙伴**
-
-<div align="center">  
-<img src="https://pt-starimg.didistatic.com/static/starimg/img/hoEGfdsUzi1600745052153.jpg" alt="图片替换文本" width="200"  align="bottom" />
-</div>
 
 ## 友情链接
 1. [Hummer](https://github.com/didi/Hummer)，Hummer 是一套高性能高可用的跨端开发框架，一套代码可以同时支持开发 Android 和 iOS 应用。现已经支持 Vue/TypeScript/JavaScript 三种语法，面向大前端开发人员，总有一款适合你。
@@ -338,4 +319,9 @@ DoKit 基于 Apache-2.0 协议进行分发和使用，更多信息参见 [协议
 
 6. 我们团队的技术公众号【滴滴OrangeLab】，欢迎关注，我们会在这里持续输出团队内部比较有深度的技术沉淀和经验分享，欢迎一起交流。
 <img src="https://pt-starimg.didistatic.com/static/starimg/img/cPlaMme4g81616682162304.jpg" width = "250" />
- 
+
+## 协议
+
+<img alt="Apache-2.0 license" src="https://www.apache.org/img/ASF20thAnniversary.jpg" width="128">
+
+DoKit 基于 Apache-2.0 协议进行分发和使用，更多信息参见 [协议文件](LICENSE)。

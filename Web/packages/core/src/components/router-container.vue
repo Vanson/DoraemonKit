@@ -23,7 +23,7 @@ export default {
       return this.$route.component
     },
     title(){
-      return this.$route.title || 'DoKit'
+      return this.$route.meta && this.$route.meta.title || 'DoKit'
     },
     canBack(){
       return this.$route.name !== 'home'
@@ -33,7 +33,7 @@ export default {
 </script>
 <style lang="less" scoped>
 .container{
-  position: absolute;
+  position: fixed;
   left: 0;
   right: 0;
   top:100px;

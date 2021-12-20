@@ -1,5 +1,6 @@
 import Console from './plugins/console/index'
 import AppInfo from './plugins/app-info/index'
+import Element from './plugins/element/index'
 import Network from './plugins/network/index'
 import Storage from './plugins/storage/index'
 import DemoPlugin from './plugins/demo-plugin/index'
@@ -9,12 +10,13 @@ import AlignRuler from './plugins/align-ruler/index'
 import HelloWorld from './components/ToolHelloWorld'
 import Resource from './plugins/resources/index'
 import ApiMock from './plugins/api-mock/index'
+import WebVitals from './plugins/web-vitals-time/index'
 
 import {IndependPlugin, RouterPlugin} from '@dokit/web-core'
 
 export const BasicFeatures = {
   title: '常用工具',
-  list: [Console, AppInfo, Resource, Network, Storage, DemoPlugin, DemoIndependPlugin, H5DoorPlugin]
+  list: [Console, AppInfo, Resource, Network, Storage, DemoPlugin, DemoIndependPlugin, H5DoorPlugin, WebVitals, Element]
   // list: [Console, AppInfo, Resource, Network, Storage, H5DoorPlugin]
 }
 
@@ -26,7 +28,7 @@ export const DokitFeatures = {
 export const UIFeatures = {
   title: '视觉功能',
   list: [AlignRuler]
-  // list: [AlignRuler, 
+  // list: [AlignRuler,
   // new RouterPlugin({
   //   nameZh: 'UI结构',
   //   name: 'view-selector',
