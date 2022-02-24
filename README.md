@@ -173,21 +173,8 @@ tips ： 如果使用我们滴滴优秀的开源跨端方案 [chameleon](https:/
 
 ## 微信交流群(一群满员，已开二群)
 搜索**justdokit**加我微信好友，注意请添加备注：昵称-DoKit社区用户，否则你的申请将不会被验证通过。
+![51640263734_ pic](https://user-images.githubusercontent.com/4486497/147242854-9693daf9-033e-4523-89da-b7b36c72642c.jpg)
 
-
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
-<br/>
 <br/>
 
 
@@ -224,17 +211,21 @@ tips ： 如果使用我们滴滴优秀的开源跨端方案 [chameleon](https:/
 **创始人**
 [yixiangboy(易翔)](https://github.com/yixiangboy)
 **负责人**
-[jtsky(金台)](https://github.com/jtsky) 
+[小枫](https://github.com/bbssyyuui) 
 
 **内部核心成员**
-[yixiangboy](https://github.com/yixiangboy)、
-[jtsky](https://github.com/jtsky) 、
+[yixiangboy(易翔)](https://github.com/yixiangboy)、
+[jtsky(金台)](https://github.com/jtsky) 、
+[小枫](https://github.com/bbssyyuui) 、
 [LinJZong](https://github.com/LinJZong) 、
 [jayconscious](https://github.com/jayconscious) 、
 [xukaibin](https://github.com/xu984386604) 、
-[jellybean](https://github.com/excitedhaha)
+[jellybean](https://github.com/excitedhaha) 、
+[maxiee](https://github.com/maxiee) 、
+[zhugeafanti](https://github.com/zhugeafanti)
 
 **贡献者榜单**
+[BzCoder](https://github.com/BzCoder) 、 
 [wangzhipeng](https://github.com/WangLao100)、
 [momoxiangbei](https://github.com/momoxiangbei)、
 [changzuozhen](https://github.com/changzuozhen)、
