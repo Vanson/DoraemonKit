@@ -115,6 +115,8 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
     private SeekRangeBar mSeekBar;
     private Group mGroupSelectPath;
     private Group mGroupSelectAutoPath;
+    private CheckBox mCbDriftLostLoc;
+    private SeekRangeBar mDriftLostLocSeekBar;
     private Button mBtnMockRoute2;
     private ImageView mIvDownExpand;
     private TextView mTvOriginDistance;
@@ -205,6 +207,8 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
         mSeekBar = findViewById(R.id.seekbar_select_path);
         mGroupSelectPath = findViewById(R.id.group_select_path);
         mGroupSelectAutoPath = findViewById(R.id.group_select_auto_path);
+        mCbDriftLostLoc = findViewById(R.id.cb_toggle_route_lost_loc);
+        mDriftLostLocSeekBar = findViewById(R.id.seekbar_select_lost_path);
         mBtnMockRoute2 = findViewById(R.id.btn_mock_route2);
         mTvOriginDistance = findViewById(R.id.tv_real_distance);
         mTvMockDistance = findViewById(R.id.tv_mock_distance);
@@ -227,6 +231,11 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
         mBtnMockRoute2.setOnClickListener(this);
         mCbToggleRouteDriftMock.setOnCheckedChangeListener(this);
         mCbToggleRouteDriftMock.setChecked(GpsMockConfig.isRouteDriftMockOpen());
+
+        mCbDriftLostLoc.setOnCheckedChangeListener(this);
+        mCbDriftLostLoc.setChecked(GpsMockConfig.isRouteDriftMockLostLocOpen());
+        mDriftLostLocSeekBar.setProgressLow(GpsMockConfig.getLostLocSeekBarLow());
+        mDriftLostLocSeekBar.setProgressHigh(GpsMockConfig.getLostLocSeekBarHigh());
 
         // 临时先屏蔽
         // mCbToggleRouteDriftMock.setEnabled(false);
@@ -388,27 +397,36 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
         // 将坐标点换算成地址名称填入起点和终点
         searchPoi(mRouteStartNode.getLocation());
         mInitRouteStart = true;
+
+        GpsMockManager.getInstance().setStatusCallback(this);
     }
 
     private void drawRoute() {
-        if (GpsMockManager.getInstance().getBdMockDrivingRouteLine() != null) {
-            mBdMapView.setOnMarkerClickListener(mDrivingRouteOverlay);
-            mDrivingRouteOverlay.setBdMapRouteData(GpsMockManager.getInstance().getBdMockDrivingRouteLine());
-            mDrivingRouteOverlay.addToMap();
-            mDrivingRouteOverlay.zoomToSpan();
+        if (checkRouteMockToggle()) {
+            if (GpsMockManager.getInstance().getBdMockDrivingRouteLine() != null) {
+                mBdMapView.setOnMarkerClickListener(mDrivingRouteOverlay);
+                mDrivingRouteOverlay.setBdMapRouteData(GpsMockManager.getInstance().getBdMockDrivingRouteLine());
+                mDrivingRouteOverlay.addToMap(mCbDriftLostLoc.isChecked());
+                mDrivingRouteOverlay.zoomToSpan();
 
-            mTvOriginDistance.setText(String.valueOf(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getTotalDistance()));
-        }
-
-        if (checkDriftToggle() && GpsMockManager.getInstance().isMockingRoute() && GpsMockManager.getInstance().getBdMockDrivingRouteLine() != null) {
-            if (mCurDriftTypeIndex == DriftType.DRIFT_TYPE_ROUTE.ordinal()) {
-                mDrivingRouteOverlay.addDriftRouteToMap(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getRouteDriftPoints(), OverlayManager.COLOR_ROUTE_DRIFT);
-                mTvMockDistance.setText(String.valueOf(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getRouteDriftDistance()));
-            } else {
-                mDrivingRouteOverlay.addDriftRandomRouteToMap(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getRandomDriftPoints(), OverlayManager.COLOR_ROUTE_DRIFT);
-                mTvMockDistance.setText(String.valueOf(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getRandomDriftDistance()));
+                mTvOriginDistance.setText(String.valueOf(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getTotalDistance()));
             }
 
+            if (checkDriftToggle()) {
+                if (GpsMockManager.getInstance().getBdMockDrivingRouteLine() != null) {
+                    if (mCurDriftTypeIndex == DriftType.DRIFT_TYPE_ROUTE.ordinal()) {
+                        mDrivingRouteOverlay.addDriftRouteToMap(GpsMockManager.getInstance().getBdMockDrivingRouteLine(), OverlayManager.COLOR_ROUTE_DRIFT, mCbDriftLostLoc.isChecked());
+                        mTvMockDistance.setText(String.valueOf(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getRouteDriftDistance()));
+                    } else {
+                        mDrivingRouteOverlay.addDriftRandomRouteToMap(GpsMockManager.getInstance().getBdMockDrivingRouteLine(), OverlayManager.COLOR_ROUTE_DRIFT, mCbDriftLostLoc.isChecked());
+                        mTvMockDistance.setText(String.valueOf(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getRandomDriftDistance()));
+                    }
+                }
+            } else {
+                mDrivingRouteOverlay.removeDriftRouteFromMap();
+            }
+        } else {
+            mDrivingRouteOverlay.removeAllRouteFromMap();
         }
     }
 
@@ -434,6 +452,8 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
             GpsMockConfig.putRouteMockAccuracy(getInputDriftAccuracy());
             GpsMockConfig.putSeekBarLow((int) mSeekBar.getProgressLow());
             GpsMockConfig.putSeekBarHigh((int) mSeekBar.getProgressHigh());
+            GpsMockConfig.putLostLocSeekBarLow((int) mDriftLostLocSeekBar.getProgressLow());
+            GpsMockConfig.putLostLocSeekBarHigh((int) mDriftLostLocSeekBar.getProgressHigh());
 
             if (GpsMockManager.getInstance().isMockingRoute()) {
                 mBtnMockRoute1.setText(R.string.btn_text_start_mock);
@@ -464,6 +484,9 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
                 // 漂移路径模拟
                 // 计算偏移点(手动选择模式)
                 GpsMockManager.getInstance().calculateDriftRoute(getInputDriftAccuracy(), mSeekBar.getProgressLow(), mSeekBar.getProgressHigh());
+                if (mCbDriftLostLoc.isChecked()){
+                    GpsMockManager.getInstance().calculateDriftRouteWithLocLost(mDriftLostLocSeekBar.getProgressLow(), mDriftLostLocSeekBar.getProgressHigh());
+                }
             } else {
                 // 计算漂移点(智能模式)待补齐.
 
@@ -481,8 +504,15 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
         } else {
             // 真实路径模拟
             if (GpsMockManager.getInstance().getBdMockDrivingRouteLine() != null) {
-                // 开始模拟
-                GpsMockManager.getInstance().startMockRouteLine(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getAllPoints(), getInputSpeed(), this);
+                if (mCbDriftLostLoc.isChecked()){
+                    GpsMockManager.getInstance().calculateOriginRouteWithLocLost(mDriftLostLocSeekBar.getProgressLow(), mDriftLostLocSeekBar.getProgressHigh());
+                    // 开始模拟
+                    GpsMockManager.getInstance().startMockRouteLine(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getOriginRouteLostLocPoints(), getInputSpeed(), this);
+                } else {
+                    // 开始模拟
+                    GpsMockManager.getInstance().startMockRouteLine(GpsMockManager.getInstance().getBdMockDrivingRouteLine().getAllPoints(), getInputSpeed(), this);
+                }
+
                 mBtnMockRoute1.setText(R.string.btn_text_stop_mock);
                 mBtnMockRoute2.setText(R.string.btn_text_stop_mock);
             }
@@ -507,6 +537,9 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
         } else if (buttonView.getId() == R.id.cb_toggle_route_drift_mock) {
             onRouteDriftMockCbChange(isChecked);
             LogHelper.d(TAG, "cb_toggle_route_drift_mock onCheckedChanged: " + " " + isChecked);
+        } else if (buttonView.getId() == R.id.cb_toggle_route_lost_loc){
+            onLostLocMockCbChange(isChecked);
+            LogHelper.d(TAG, "cb_toggle_route_lost_loc onCheckedChanged: " + " " + isChecked);
         }
     }
 
@@ -585,6 +618,7 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
 
         saveMockToggle();
         GpsMockConfig.putRouteMockOpen(isChecked);
+        drawRoute();
     }
 
     /**
@@ -606,8 +640,19 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
     }
 
     private void onRouteDriftMockCbChange(boolean isChecked) {
+        if (!isChecked && GpsMockManager.getInstance().isMockingRoute()) {
+            mCbToggleRouteDriftMock.setChecked(true);
+            ToastUtils.showShort("轨迹模拟正在进行, 请先取消");
+            return;
+        }
+
         showDriftLayout(isChecked);
         GpsMockConfig.putRouteDriftMockOpen(isChecked);
+        drawRoute();
+    }
+
+    private void onLostLocMockCbChange(boolean isChecked){
+        GpsMockConfig.putRouteDriftMockLostLocOpen(isChecked);
     }
 
     private float getInputSpeed() {
@@ -1001,18 +1046,32 @@ public class GpsMockFragment extends BaseFragment implements View.OnClickListene
             DoKit.removeFloating(RouteMockDokitView.class);
         }
 
-        super.onDestroy();
+        if (mRootView != null) {
+            mRootView.removeTransitionListener(this);
+        }
+
         mBdMapView.setMyLocationEnabled(false);
+        mBdMapView = null;
         mMapView.onDestroy();
         mMapView = null;
 
         if (mBdLocationClient != null) {
+            mBdLocationClient.stop();
             mBdLocationClient.unRegisterLocationListener(mBDAbstractLocationListener);
+            mBdLocationClient = null;
         }
 
         if (mRoutePlanSearch != null) {
             mRoutePlanSearch.destroy();
+            mRoutePlanSearch = null;
         }
+
+        if (mGeoCoder != null) {
+            mGeoCoder.destroy();
+            mGeoCoder = null;
+        }
+        GpsMockManager.getInstance().removeStatusCallback();
+        super.onDestroy();
     }
 
     public static enum DriftMode {

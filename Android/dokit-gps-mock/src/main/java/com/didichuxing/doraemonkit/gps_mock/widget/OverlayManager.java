@@ -24,6 +24,7 @@ import com.baidu.mapapi.map.Stroke;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.model.LatLngBounds;
 import com.didichuxing.doraemonkit.gps_mock.R;
+import com.didichuxing.doraemonkit.gps_mock.common.BdMapRouteData;
 import com.didichuxing.doraemonkit.util.ConvertUtils;
 
 import java.util.ArrayList;
@@ -45,13 +46,14 @@ import java.util.List;
 public abstract class OverlayManager implements OnMarkerClickListener, OnPolylineClickListener {
 
     BaiduMap mBaiduMap = null;
+    protected BdMapRouteData mBdMapRouteData;
     private List<OverlayOptions> mOverlayOptionList = null;
 
-    List<Overlay> mOverlayList = null;
+    List<Overlay> mOriginRouteOverlayList = null;
 
     // 漂移路线
-    private Overlay mDriftRouteOverlay;
-    private Overlay mDriftRandomOverlay;
+    // private Overlay mDriftRouteOverlay;
+    // private Overlay mDriftRandomOverlay;
     // 实时坐标
     private Overlay mLocMarkOverlay;
     private Bitmap mLocMarkBitmap;
@@ -60,6 +62,9 @@ public abstract class OverlayManager implements OnMarkerClickListener, OnPolylin
 
     public static final int COLOR_ROUTE_DRIFT = 0x80FF0000;
     public static final int COLOR_ROUTE = 0xBF004EFF;
+    public static final int COLOR_LOST_LOC_POINT = 0xFFFFFF00; //黄色
+    public static final int COLOR_LOST_LOC_LINE = 0xFFD2691E;
+    public static final int LOST_LOC_POINT_DOT_RADIUS = 16;
 
     /**
      * 通过一个BaiduMap 对象构造
@@ -72,8 +77,8 @@ public abstract class OverlayManager implements OnMarkerClickListener, OnPolylin
         if (mOverlayOptionList == null) {
             mOverlayOptionList = new ArrayList<OverlayOptions>();
         }
-        if (mOverlayList == null) {
-            mOverlayList = new ArrayList<Overlay>();
+        if (mOriginRouteOverlayList == null) {
+            mOriginRouteOverlayList = new ArrayList<Overlay>();
         }
     }
 
@@ -89,46 +94,60 @@ public abstract class OverlayManager implements OnMarkerClickListener, OnPolylin
     /**
      * 将所有Overlay 添加到地图上
      */
-    public final void addToMap() {
+    public final void addToMap(boolean lostLocChecked) {
         if (mBaiduMap == null) {
             return;
         }
 
-        removeFromMap();
+        removeAllRouteFromMap();
         List<OverlayOptions> overlayOptions = getOverlayOptions();
         if (overlayOptions != null) {
             mOverlayOptionList.addAll(overlayOptions);
         }
 
         for (OverlayOptions option : mOverlayOptionList) {
-            mOverlayList.add(mBaiduMap.addOverlay(option));
+            mOriginRouteOverlayList.add(mBaiduMap.addOverlay(option));
+        }
+
+        List<LatLng> points = mBdMapRouteData.getOriginRouteLostLocPoints();
+        if (points == null || points.size() <= 0) return;
+
+        OverlayOptions originRouteLostLocOverlayOption = getPolylineOptions(points, COLOR_LOST_LOC_LINE);
+        mOriginRouteOverlayList.add(mBaiduMap.addOverlay(originRouteLostLocOverlayOption));
+
+        if (lostLocChecked && mBdMapRouteData != null && mBdMapRouteData.mOriginRouteStartLostPoint != null && mBdMapRouteData.mOriginRouteEndLostPoint != null) {
+            mOriginRouteOverlayList.add(addDotToMap(mBdMapRouteData.mOriginRouteStartLostPoint, LOST_LOC_POINT_DOT_RADIUS, COLOR_LOST_LOC_POINT));
+            mOriginRouteOverlayList.add(addDotToMap(mBdMapRouteData.mOriginRouteEndLostPoint, LOST_LOC_POINT_DOT_RADIUS, COLOR_LOST_LOC_POINT));
         }
     }
 
+    List<Overlay> mDriftRouteOverlayList = new ArrayList<>();
 
-    public final void addDriftRouteToMap(List<LatLng> points, int lineColor) {
+    public final void addDriftRouteToMap(BdMapRouteData bdMapRouteData, int lineColor, boolean lostLocChecked) {
+        List<LatLng> points = bdMapRouteData.getRouteDriftPoints();
         if (points == null || points.size() <= 0) return;
 
         if (mBaiduMap == null) {
             return;
         }
 
-        if (mDriftRandomOverlay != null) {
-            mDriftRandomOverlay.remove();
-        }
+        removeDriftRouteFromMap();
+        OverlayOptions driftOverlayOption = getPolylineOptions(points, lineColor);
+        mDriftRouteOverlayList.add(mBaiduMap.addOverlay(driftOverlayOption));
 
-        if (mDriftRouteOverlay != null) {
-            mDriftRouteOverlay.remove();
-        }
+        if (lostLocChecked) {
+            if (bdMapRouteData.mRouteDriftStartLostPoint != null) {
+                mDriftRouteOverlayList.add(addDotToMap(bdMapRouteData.mRouteDriftStartLostPoint, LOST_LOC_POINT_DOT_RADIUS, COLOR_LOST_LOC_POINT));
+            }
 
-        if (mDriftRandomDotOverlay.size() > 0) {
-            for (Overlay overlay : mDriftRandomDotOverlay) {
-                overlay.remove();
+            if (bdMapRouteData.mRouteDriftEndLostPoint != null) {
+                mDriftRouteOverlayList.add(addDotToMap(bdMapRouteData.mRouteDriftEndLostPoint, LOST_LOC_POINT_DOT_RADIUS, COLOR_LOST_LOC_POINT));
             }
         }
+    }
 
-        OverlayOptions driftOverlayOption = getPolylineOptions(points, lineColor);
-        mDriftRouteOverlay = mBaiduMap.addOverlay(driftOverlayOption);
+    public final Overlay addDotToMap(LatLng point, int radiusPx, int color) {
+        return addPointMark(point, radiusPx, color);
     }
 
     private final List<Overlay> mDriftRandomDotOverlay = new ArrayList<>();
@@ -139,37 +158,36 @@ public abstract class OverlayManager implements OnMarkerClickListener, OnPolylin
         if (mBaiduMap == null) {
             return;
         }
-        if (mDriftRouteOverlay != null) {
-            mDriftRouteOverlay.remove();
-        }
 
-        if (mDriftRandomDotOverlay.size() > 0) {
-            for (Overlay overlay : mDriftRandomDotOverlay) {
-                overlay.remove();
-            }
-        }
-
+        removeDriftRouteFromMap();
         for (LatLng latLng : points) {
-            mDriftRandomDotOverlay.add(addPointMark(latLng, 8, color));
+            mDriftRandomDotOverlay.add(addDotToMap(latLng, 8, color));
         }
     }
 
-    public final void addDriftRandomRouteToMap(List<LatLng> points, int lineColor) {
+    private final List<Overlay> mDriftRandomOverlayList = new ArrayList<>();
+
+    public final void addDriftRandomRouteToMap(BdMapRouteData bdMapRouteData, int lineColor, boolean lostLocChecked) {
+        List<LatLng> points = bdMapRouteData.getRandomDriftPoints();
         if (points == null || points.size() <= 0) return;
 
         if (mBaiduMap == null) {
             return;
         }
-        if (mDriftRouteOverlay != null) {
-            mDriftRouteOverlay.remove();
-        }
 
-        if (mDriftRandomOverlay != null) {
-            mDriftRandomOverlay.remove();
-        }
-
+        removeDriftRouteFromMap();
         OverlayOptions driftOverlayOption = getPolylineOptions(points, lineColor);
-        mDriftRandomOverlay = mBaiduMap.addOverlay(driftOverlayOption);
+        mDriftRandomOverlayList.add(mBaiduMap.addOverlay(driftOverlayOption));
+
+        if (lostLocChecked) {
+            if (bdMapRouteData.mRandomDriftStartLostPoint != null) {
+                mDriftRandomOverlayList.add(addDotToMap(bdMapRouteData.mRandomDriftStartLostPoint, LOST_LOC_POINT_DOT_RADIUS, COLOR_LOST_LOC_POINT));
+            }
+
+            if (bdMapRouteData.mRandomDriftEndLostPoint != null) {
+                mDriftRandomOverlayList.add(addDotToMap(bdMapRouteData.mRandomDriftEndLostPoint, LOST_LOC_POINT_DOT_RADIUS, COLOR_LOST_LOC_POINT));
+            }
+        }
     }
 
     private Bitmap getBitmap(int vectorDrawableId) {
@@ -227,18 +245,46 @@ public abstract class OverlayManager implements OnMarkerClickListener, OnPolylin
             .color(color));
     }
 
-    /**
-     * 将所有Overlay 从 地图上消除
-     */
-    public final void removeFromMap() {
+    public final void removeAllRouteFromMap() {
+        removeOriginRouteFromMap();
+        removeDriftRouteFromMap();
+    }
+
+    public final void removeDriftRouteFromMap() {
         if (mBaiduMap == null) {
             return;
         }
-        for (Overlay marker : mOverlayList) {
+
+        if (mDriftRouteOverlayList.size() > 0) {
+            for (Overlay overlay : mDriftRouteOverlayList) {
+                overlay.remove();
+            }
+        }
+        if (mDriftRandomOverlayList.size() > 0) {
+            for (Overlay overlay : mDriftRandomOverlayList) {
+                overlay.remove();
+            }
+        }
+
+        if (mDriftRandomDotOverlay.size() > 0) {
+            for (Overlay overlay : mDriftRandomDotOverlay) {
+                overlay.remove();
+            }
+        }
+    }
+
+    /**
+     * 将所有Overlay 从 地图上消除
+     */
+    public final void removeOriginRouteFromMap() {
+        if (mBaiduMap == null) {
+            return;
+        }
+        for (Overlay marker : mOriginRouteOverlayList) {
             marker.remove();
         }
         mOverlayOptionList.clear();
-        mOverlayList.clear();
+        mOriginRouteOverlayList.clear();
 
     }
 
@@ -252,9 +298,9 @@ public abstract class OverlayManager implements OnMarkerClickListener, OnPolylin
         if (mBaiduMap == null) {
             return;
         }
-        if (mOverlayList.size() > 0) {
+        if (mOriginRouteOverlayList.size() > 0) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            for (Overlay overlay : mOverlayList) {
+            for (Overlay overlay : mOriginRouteOverlayList) {
                 // polyline 中的点可能太多，只按marker 缩放
                 if (overlay instanceof Marker) {
                     builder.include(((Marker) overlay).getPosition());
@@ -278,9 +324,9 @@ public abstract class OverlayManager implements OnMarkerClickListener, OnPolylin
         if (mBaiduMap == null) {
             return;
         }
-        if (mOverlayList.size() > 0) {
+        if (mOriginRouteOverlayList.size() > 0) {
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            for (Overlay overlay : mOverlayList) {
+            for (Overlay overlay : mOriginRouteOverlayList) {
                 // polyline 中的点可能太多，只按marker 缩放
                 if (overlay instanceof Marker) {
                     builder.include(((Marker) overlay).getPosition());
