@@ -73,8 +73,11 @@ iOS各式各样的工具集合
 
   s.subspec 'Core' do |ss| 
     ss.source_files = 'iOS/DoraemonKit/Src/Core/**/*.{h,m,c,mm}'
+    
+    ## Image sets from Frameworks broken on Xcode 13? (Store only bug)
+    ## https://developer.apple.com/forums/thread/691272
     ss.resource_bundle = {
-      'DoraemonKit' => 'iOS/DoraemonKit/Resource/**/*'
+      'DoKit' => 'iOS/DoraemonKit/Resource/**/*'
     }
     ss.dependency 'GCDWebServer'
     ss.dependency 'GCDWebServer/WebUploader'

@@ -14,7 +14,7 @@
     if(name &&
        ![name isEqualToString:@""]){
         NSBundle *bundle = [NSBundle bundleForClass:NSClassFromString(@"DoraemonManager")];
-        NSURL *url = [bundle URLForResource:@"DoraemonKit" withExtension:@"bundle"];
+        NSURL *url = [bundle URLForResource:@"DoKit" withExtension:@"bundle"];
         if(!url) return [UIImage new];
         NSBundle *imageBundle = [NSBundle bundleWithURL:url];
         
@@ -42,7 +42,7 @@
     if(name &&
        ![name isEqualToString:@""]){
         NSBundle *bundle = [NSBundle bundleForClass:NSClassFromString(@"DoraemonManager")];
-        NSURL *url = [bundle URLForResource:@"DoraemonKit" withExtension:@"bundle"];
+        NSURL *url = [bundle URLForResource:@"DoKit" withExtension:@"bundle"];
         if(!url) return [UIImage new];
         NSBundle *imageBundle = [NSBundle bundleWithURL:url];
         UIImage *image = [UIImage imageNamed:name inBundle:imageBundle compatibleWithTraitCollection:nil];
